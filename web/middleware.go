@@ -7,9 +7,6 @@ import (
 	"sync"
 )
 
-// Maximum size of the pool of spare middleware stacks
-const mPoolSize = 32
-
 type mLayer struct {
 	fn   func(*C, http.Handler) http.Handler
 	orig interface{}
@@ -18,7 +15,7 @@ type mLayer struct {
 type mStack struct {
 	lock   sync.Mutex
 	stack  []mLayer
-	pool   chan *cStack
+	pool   *sync.Pool
 	router internalRouter
 }
 
@@ -46,7 +43,7 @@ cStack on the floor.
 type cStack struct {
 	C
 	m    http.Handler
-	pool chan *cStack
+	pool *sync.Pool
 }
 
 func (s *cStack) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +83,11 @@ func (m *mStack) findLayer(l interface{}) int {
 }
 
 func (m *mStack) invalidate() {
-	m.pool = make(chan *cStack, mPoolSize)
+	m.pool = &sync.Pool{
+		New: func() interface{} {
+			return m.newStack()
+		},
+	}
 }
 
 func (m *mStack) newStack() *cStack {
@@ -112,32 +113,14 @@ func (m *mStack) alloc() *cStack {
 	// sync/atomic, but for now I happen to know that on all the
 	// architectures I care about it happens to be atomic.
 	p := m.pool
-	var cs *cStack
-	select {
-	case cs = <-p:
-		// This can happen if we race against an invalidation. It's
-		// completely peaceful, so long as we assume we can grab a cStack before
-		// our stack blows out.
-		if cs == nil {
-			return m.alloc()
-		}
-	default:
-		cs = m.newStack()
-	}
-
+	cs := p.Get().(*cStack)
 	cs.pool = p
 	return cs
 }
 
 func (m *mStack) release(cs *cStack) {
 	cs.C = C{}
-	if cs.pool != m.pool {
-		return
-	}
-	select {
-	case cs.pool <- cs:
-	default:
-	}
+	cs.pool.Put(cs)
 }
 
 // Append the given middleware to the middleware stack. See the documentation

@@ -17,11 +17,12 @@ func makeStack(ch chan string) *mStack {
 	router := func(c *C, w http.ResponseWriter, r *http.Request) {
 		ch <- "router"
 	}
-	return &mStack{
+	ms := &mStack{
 		stack:  make([]mLayer, 0),
-		pool:   make(chan *cStack, mPoolSize),
 		router: iRouter(router),
 	}
+	ms.invalidate()
+	return ms
 }
 
 func chanWare(ch chan string, s string) func(http.Handler) http.Handler {
@@ -215,9 +216,9 @@ func TestContext(t *testing.T) {
 	}
 	st := mStack{
 		stack:  make([]mLayer, 0),
-		pool:   make(chan *cStack, mPoolSize),
 		router: iRouter(router),
 	}
+	st.invalidate()
 	st.Use(func(c *C, h http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			if c.Env != nil || c.URLParams != nil {
