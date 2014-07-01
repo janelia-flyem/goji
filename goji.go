@@ -8,8 +8,8 @@ Example:
 		"fmt"
 		"net/http"
 
-		"github.com/zenazn/goji"
-		"github.com/zenazn/goji/web"
+		"github.com/janelia-flyem/goji"
+		"github.com/janelia-flyem/goji/web"
 	)
 
 	func hello(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -40,8 +40,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/zenazn/goji/bind"
-	"github.com/zenazn/goji/graceful"
+	"github.com/janelia-flyem/goji/bind"
+	"github.com/janelia-flyem/goji/graceful"
 )
 
 // Serve starts Goji using reasonable defaults.

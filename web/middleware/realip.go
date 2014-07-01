@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/zenazn/goji/web"
+	"github.com/janelia-flyem/goji/web"
 )
 
 // Key the original value of RemoteAddr is stored under.

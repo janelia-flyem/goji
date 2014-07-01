@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/zenazn/goji/web"
+	"github.com/janelia-flyem/goji/web"
 )
 
 // EnvInit is a middleware that allocates an environment map if one does not

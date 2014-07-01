@@ -1,8 +1,8 @@
 package goji
 
 import (
-	"github.com/zenazn/goji/web"
-	"github.com/zenazn/goji/web/middleware"
+	"github.com/janelia-flyem/goji/web"
+	"github.com/janelia-flyem/goji/web/middleware"
 )
 
 // The default web.Mux.
